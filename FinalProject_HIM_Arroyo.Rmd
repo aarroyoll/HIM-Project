@@ -1,0 +1,115 @@
+---
+title: "Health Informatics Final Project"
+author: "Anamarys Arroyo Lloret"
+date: "2023-12-10"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(psych)
+library(haven)
+library(writexl)
+
+setwd("/Users/anabanana/Desktop/HIM 5102/Project/HIM Final Project")
+DrugData <- read_sav("/Users/anabanana/Desktop/EPBI_8208/Final Project/Data/NHSDA1996spss.sav")
+
+```
+
+``` {r}
+# Create the  subset
+
+DrugData2 <- subset(
+  DrugData,
+  select = c("IRAGE", "IRSEX", "IRRACE", "IREDUC", "IRALCFQ", "CIGFLAG", "ALCFLAG", 
+             "WORKSTAT", "HTININCH", "POUNDS", "HEALTH", "DRUNKYR", "ALCTRY", "CIGTRY", 
+             "VALYRFRQ", "VAL30USE", "NODR30A")
+)
+
+```
+
+``` {r}
+# Overview of the data
+
+# sample size -- use number of rows in the dataset to get a number of subjects
+nrow(DrugData2)
+
+# number of observations and variables
+dim(DrugData2)
+
+# number of missing values in the dataset
+sum(is.na(DrugData2))
+
+# % of missing data
+(colMeans(is.na(DrugData2)))*100
+
+```
+
+``` {r}
+# Cleaning the data
+
+# cleaning/handling missing data and changing some values to zero
+
+# 85, 94, 95, 98 are missing
+DrugData2$NODR30A[DrugData2$NODR30A %in% c(85, 94, 95, 98)] <- NA
+
+# 83 and 93 both mean "did not use alcohol in past 30 days"
+
+DrugData2$NODR30A[DrugData2$NODR30A %in% c(83, 93)] <- 0
+
+# 89, 96, 97, 98, 99 are missing
+DrugData2$VALYRFRQ[DrugData2$VALYRFRQ %in% c(89, 96, 97, 98, 99)] <- NA
+
+# 85, 89, 94, 95, 97, 98, 99 are missing
+DrugData2$VAL30USE[DrugData2$VAL30USE %in% c(85, 89, 94, 95, 97, 98, 99)] <- NA
+
+# 83 and 93 both mean "did not drive drunk"
+
+DrugData2$VAL30USE[DrugData2$VAL30USE %in% c(83, 93)] <- 0
+
+library(writexl)
+write_xlsx(DrugData2, path = "/Users/anabanana/Desktop/HIM 5102/DrugData2.xlsx")
+```
+
+``` {r}
+# Segmenting based on alcohol use
+alcuser <- subset(DrugData2, NODR30A != 81 & !is.na(NODR30A)) #new subset of only alcohol user
+nonalcuser <- subset(DrugData2, NODR30A == 81 | is.na(NODR30A)) #new subset of only non-drinkers
+
+# Getting N of both groups 
+
+# Total number of alcohol users
+nrow(alcuser)
+
+# Total number of non-alcohol users
+nrow(nonalcuser)
+
+```
+
+``` {r}
+# Summary statistics
+
+summary(DrugData2)
+
+# Frequency tables for categorical variables in the alcohol user group
+alc_freq_sex <- table(alcuser$IRSEX)
+alc_freq_race <- table(alcuser$IRRACE)
+alc_freq_cig <- table(alcuser$CIGFLAG)
+alc_freq_drink <- table(alcuser$ALCFLAG)
+alc_freq_sex
+alc_freq_race
+alc_freq_cig
+alc_freq_drink
+
+# Frequency tables for categorical variables in the non-alcohol user group
+nonalc_freq_sex <- table(nonalcuser$IRSEX)
+nonalc_freq_race <- table(nonalcuser$IRRACE)
+nonalc_freq_cig <- table(nonalcuser$CIGFLAG)
+nonalc_freq_drink <- table(nonalcuser$ALCFLAG)
+nonalc_freq_sex
+nonalc_freq_race
+nonalc_freq_cig
+nonalc_freq_drink
+
+
+```
+
